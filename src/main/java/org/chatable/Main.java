@@ -2,7 +2,6 @@ package org.chatable;
 
 /**
  * Created by henrystevens on 2/02/15.
- * For Summer Research Scholarship
  */
 public class Main {
 
