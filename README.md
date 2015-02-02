@@ -3,4 +3,7 @@ Lightweight Java Chat Library
 
 By Henry Stevens & Jack Gerrits
 
-An untold story.
+An untold story of Java and text based chat. This is surely something you have never seen before.
+Keep your eyes peeled on this space, this will be the fastest and most beautiful text chat ever.
+
+It will make you WANT to talk to your friends.
