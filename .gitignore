@@ -4,3 +4,5 @@
 .idea
 *.iml
 *.name
+build
+*.log
