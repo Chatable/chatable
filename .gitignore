@@ -1,0 +1,4 @@
+# Gradle auto-generated files #
+*.xml
+*.iml
+*.name
