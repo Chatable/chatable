@@ -1,4 +1,6 @@
 # Gradle auto-generated files #
-*.xml
+.gradle
+.build
+.idea
 *.iml
 *.name
