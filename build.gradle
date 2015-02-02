@@ -1,4 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = "org.chatable.Server"
 
 version = '1.0'
 
@@ -15,8 +18,4 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.2.1'
-}
-
-task run << {
-    println 'Default Running!'
 }

@@ -16,6 +16,11 @@ import java.net.UnknownHostException;
  */
 public class Connection implements Runnable {
 
+    public enum Type {
+        SERVER, CLIENT
+    }
+
+    Type type;
     private String ip;
     private int port;
     private Socket socket;
@@ -24,9 +29,8 @@ public class Connection implements Runnable {
     private BufferedReader input;
     private static final Logger logger = LogManager.getLogger(Connection.class);
 
-   /*
-   // UNUSED
     public Connection(String ip, int port) {
+        type = Type.CLIENT;
         this.ip = ip;
         this.port = port;
 
@@ -41,11 +45,31 @@ public class Connection implements Runnable {
             logger.error(e.toString());
         }
     }
-*/
+
     public Connection(Socket socket, Server server) {
+        type = Type.SERVER;
+
         try{
             this.socket = socket;
             this.server = server;
+            output = new PrintWriter(socket.getOutputStream(), true);
+            input = new BufferedReader(new InputStreamReader(
+                    socket.getInputStream()));
+            ip = socket.getRemoteSocketAddress().toString();
+            port = socket.getPort();
+        } catch (UnknownHostException e) {
+            logger.error(e.toString());
+        } catch (IOException e) {
+            logger.error(e.toString());
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+    }
+
+    public Connection(Socket socket) {
+
+        try{
+            this.socket = socket;
             output = new PrintWriter(socket.getOutputStream(), true);
             input = new BufferedReader(new InputStreamReader(
                     socket.getInputStream()));
@@ -104,9 +128,14 @@ public class Connection implements Runnable {
     }
 
     public void run() {
-        while(true){
+        if(type==Type.SERVER){
+            while(true){
+                String message = this.read();
+                server.broadcast(message, this);
+            }
+        } else if ( type==Type.CLIENT) {
             String message = this.read();
-            server.broadcast(message, this);
+            System.out.println("Received: " + message);
         }
     }
 }
