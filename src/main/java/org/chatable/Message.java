@@ -1,0 +1,22 @@
+package org.chatable;
+
+/**
+ * Created by jackgerrits on 2/02/15.
+ */
+public class Message {
+    private String message;
+    private Connection sender;
+
+    public Message(String message, Connection sender){
+        this.message = message;
+        this.sender = sender;
+    }
+
+    public String getMessage(){
+        return message;
+    }
+
+    public Connection getSender(){
+        return sender;
+    }
+}

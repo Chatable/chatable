@@ -14,15 +14,18 @@ import java.net.UnknownHostException;
 /**
  * Created by jackgerrits on 2/02/15.
  */
-public class Connection {
+public class Connection implements Runnable {
 
     private String ip;
     private int port;
     private Socket socket;
+    private Server server;
     private PrintWriter output;
     private BufferedReader input;
     private static final Logger logger = LogManager.getLogger(Connection.class);
 
+   /*
+   // UNUSED
     public Connection(String ip, int port) {
         this.ip = ip;
         this.port = port;
@@ -38,10 +41,11 @@ public class Connection {
             logger.error(e.toString());
         }
     }
-
-    public Connection(Socket socket) {
+*/
+    public Connection(Socket socket, Server server) {
         try{
             this.socket = socket;
+            this.server = server;
             output = new PrintWriter(socket.getOutputStream(), true);
             input = new BufferedReader(new InputStreamReader(
                     socket.getInputStream()));
@@ -97,5 +101,12 @@ public class Connection {
 
     public int getPort(){
         return port;
+    }
+
+    public void run() {
+        while(true){
+            String message = this.read();
+            server.broadcast(message, this);
+        }
     }
 }
