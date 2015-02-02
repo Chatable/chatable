@@ -1,6 +1,6 @@
 # chatable
 ![Coverage Status](https://coveralls.io/repos/HenryStevens/chatable/badge.svg)](https://coveralls.io/r/HenryStevens/chatable)
-
+[![Build Status](https://travis-ci.org/HenryStevens/chatable.svg?branch=master)](https://travis-ci.org/HenryStevens/chatable)
 Lightweight Java Chat Library
 
 By Henry Stevens & Jack Gerrits
