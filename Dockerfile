@@ -1,4 +1,4 @@
-from base
+from dockerfile/java
 maintainer henry stevens
 
 # Install prerequisites
@@ -15,12 +15,4 @@ run apt-get install -y oracle-java8-installer
 run apt-get install -y git maven
 
 # Clone project
-run git clone https://github.com/dgageot/helloworld.git
-
-# Build project
-run cd helloworld &amp;&amp; mvn verify dependency:copy-dependencies
-
-# Expose the http port
-expose 8080
-
-workdir helloworld
+run git clone https://github.com/HenryStevens/chatable.git
