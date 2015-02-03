@@ -8,3 +8,15 @@ An untold story of Java and text based chat. This is surely something you have n
 Keep your eyes peeled on this space, this will be the fastest and most beautiful text chat ever.
 
 It will make you WANT to talk to your friends.
+
+##Run Instructions
+
+On a server with [Docker](https://www.docker.com/) installed run:
+
+`docker build -t chatable/server github.com/HenryStevens/chatable`
+
+to create the image, and then:
+
+`docker run -P <image-id>`
+
+to create and run a new container from that image.
