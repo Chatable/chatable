@@ -1,4 +1,4 @@
-from dockerfile/java
+from dockerfile/oracle-java8
 maintainer henry stevens
 
 # Install prerequisites
