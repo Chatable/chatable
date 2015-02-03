@@ -22,4 +22,4 @@ expose 12345
 
 workdir chatable
 
-cmd ["./graldew", "run"]
+cmd ["pwd"]
