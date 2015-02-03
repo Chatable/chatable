@@ -13,7 +13,7 @@ public class Server {
 
     private ArrayList<Connection> allConnections;
     private ArrayBlockingQueue<Message> messages;
-    private final int PORT = 1234;
+    private final int PORT = 12345;
     private final int QUEUE_SIZE = 10;
 
     public static void main(String args[]){

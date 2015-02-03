@@ -16,3 +16,11 @@ run apt-get install -y git maven
 
 # Clone project
 run git clone https://github.com/HenryStevens/chatable.git
+
+# Expose the http port
+expose 12345
+
+workdir chatable
+
+cmd ["graldew", "jar"]
+cmd ["java", "-jar", "target/hello.jar"]
