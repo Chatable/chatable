@@ -11,11 +11,10 @@ public class Client {
 
     public Client(String ip, int port){
         this.connection = new Connection(ip,port);
-        this.connection.run();
     }
 
     public static void main(String args[]){
-        String ip = "127.0.0.1";
+        String ip = "localhost";
         int port = 1234;
 
         Client client = new Client(ip,port);

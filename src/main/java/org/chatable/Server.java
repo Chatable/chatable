@@ -1,13 +1,10 @@
 package org.chatable;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by jackgerrits on 2/02/15.
@@ -53,7 +50,6 @@ public class Server {
                 Socket socket = ss.accept();
                 Connection current = new Connection(socket, this);
                 allConnections.add(current);
-                current.run();
             } catch (SocketTimeoutException e){
                 System.out.println("Timeout - checking broadcasts");
                 processBroadcasts();
