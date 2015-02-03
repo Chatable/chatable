@@ -24,4 +24,4 @@ workdir chatable
 
 cmd ["pwd"]
 cmd ["ls"]
-cmd ["./gradlew", "jar"]
+cmd ["./gradlew", "run"]
