@@ -23,3 +23,5 @@ expose 12345
 workdir chatable
 
 cmd ["pwd"]
+cmd ["ls"]
+cmd ["./gradlew", "jar"]
