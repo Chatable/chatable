@@ -23,4 +23,4 @@ expose 12345
 workdir chatable
 
 cmd ["graldew", "jar"]
-cmd ["java", "-jar", "target/hello.jar"]
+cmd ["java", "-jar", "build/libs/chatable-1.0.jar"]
