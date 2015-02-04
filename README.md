@@ -13,7 +13,7 @@ It will make you WANT to talk to your friends.
 
 On a server with [Docker](https://www.docker.com/) installed run:
 
-`docker build -t chatable/server github.com/HenryStevens/chatable`
+`docker build -t chatable/server github.com/Chatable/chatable.git`
 
 to create the image, and then:
 
