@@ -18,7 +18,7 @@ public class Driver {
 
         Client client = new Client(ip, port);
         Scanner kb = new Scanner(System.in);
-        while (true) {
+        while(true) {
             String input = kb.nextLine();
             if(input.toLowerCase().equals("quit")||input.toLowerCase().equals("quit")){
                 client.close();
