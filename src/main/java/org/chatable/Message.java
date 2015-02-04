@@ -7,6 +7,11 @@ public class Message {
     private String message;
     private Connection sender;
 
+    /**
+     * Holds extra information about the message
+     * @param message Message content
+     * @param sender Connection that sent the message
+     */
     public Message(String message, Connection sender){
         this.message = message;
         this.sender = sender;

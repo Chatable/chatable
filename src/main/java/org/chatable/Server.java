@@ -13,23 +13,31 @@ public class Server {
 
     private ArrayList<Connection> allConnections;
     private ArrayBlockingQueue<Message> messages;
-    private final int PORT = 1234;
+    private int port;
     private final int QUEUE_SIZE = 10;
 
     public static void main(String args[]){
-        Server server = new Server();
+        Server server = new Server(12345);
         try {
             server.run();
         } catch(Exception e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Adds a message to the queue for sending messages which the server will process inbetween socket accepts.
+     * @param message
+     * @param sender
+     */
     public void broadcast(String message, Connection sender){
         messages.add(new Message(message,sender));
     }
 
+    /**
+     * Sends all messages queued for broacasting to all connections, except the one that sent the message.
+     * @throws InterruptedException
+     */
     public void processBroadcasts() throws InterruptedException {
         while(!messages.isEmpty()){
             Message current = messages.take();
@@ -41,8 +49,12 @@ public class Server {
         }
     }
 
-    public void run() throws Exception{
-        ServerSocket ss = new ServerSocket(PORT);
+    /**
+     * Infinite loop for server. Accepts new connections and serves messages that are broadcasted by current connections.
+     * @throws Exception Proper exception handling has not yet been implemented.
+     */
+    public void run() throws Exception {
+        ServerSocket ss = new ServerSocket(port);
 
         while(true){
             ss.setSoTimeout(500);
@@ -57,7 +69,8 @@ public class Server {
         }
     }
 
-    public Server () {
+    public Server (int port) {
+        this.port = port;
         allConnections = new ArrayList<Connection>();
         messages = new ArrayBlockingQueue<Message>(QUEUE_SIZE);
     }
