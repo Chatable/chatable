@@ -11,6 +11,12 @@ public class Client {
 
     public Client(String ip, int port){
         this.connection = new Connection(ip,port);
+//        try{
+//            wait(500);
+//        } catch (Exception e) {
+//            System.out.println("Interrupted");
+//        }
+//        connection.send("name:"+name);
     }
 
     public void send(String message){

@@ -30,6 +30,7 @@ public class Connection {
     private PrintWriter output;
     private BufferedReader input;
     private static final Logger logger = LogManager.getLogger(Connection.class);
+    //private String name;
 
     /**
      * Constructor for connections from client to server.
@@ -40,6 +41,7 @@ public class Connection {
         type = Type.CLIENT;
         this.ip = ip;
         this.port = port;
+        //this.name = name;
 
         try{
             socket = new Socket();
@@ -85,6 +87,14 @@ public class Connection {
             logger.error(e.toString());
         }
 
+//        while(true){
+//            String init = read();
+//            if(init!=null){
+//                name = init.substring(init.indexOf(':'));
+//                break;
+//            }
+//        }
+
         listener = new InputListener();
         new Thread(new Thread(listener)).start();
     }
@@ -100,6 +110,7 @@ public class Connection {
         }
 
         output.println(input);
+        //output.println("name: " + input);
 
         if(output.checkError()){
             output.flush();
@@ -188,14 +199,15 @@ public class Connection {
                     String message = read();
                     if(message!=null){
                         getServer().broadcast(message, getRef());
-                        System.out.println("Received: " + message);
+                        System.out.println("RECEIVED: " + message);
+                        //System.out.println("RECEIVED - " + name + ": " + message);
                     }
                 }
             } else if (getType() == Type.CLIENT) {
                 while(running) {
                     String message = read();
                     if (message != null) {
-                        System.out.println("Received: " + message);
+                        System.out.println(message);
                     }
                 }
             }
