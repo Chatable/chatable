@@ -1,4 +1,6 @@
-# chatable
+![][logo]
+[logo]: https://avatars0.githubusercontent.com/u/10842034?v=3&s=200 "Chatable"
+
 [![Build Status](https://travis-ci.org/HenryStevens/chatable.svg?branch=master)](https://travis-ci.org/HenryStevens/chatable)
 Lightweight Java Chat Library
 
