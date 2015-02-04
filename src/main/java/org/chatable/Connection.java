@@ -1,6 +1,5 @@
 package org.chatable;
 
-import javafx.scene.Parent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,6 +31,11 @@ public class Connection {
     private BufferedReader input;
     private static final Logger logger = LogManager.getLogger(Connection.class);
 
+    /**
+     * Constructor for connections from client to server.
+     * @param ip ip to connect to, can also be a domain name
+     * @param port port to connect to
+     */
     public Connection(String ip, int port) {
         type = Type.CLIENT;
         this.ip = ip;
@@ -52,8 +56,18 @@ public class Connection {
         new Thread(new Thread(listener)).start();
     }
 
+    /**
+     * Constructor for connections from server to client
+     * @param socket Connected socket to client
+     * @param server Reference to server object that is managing the connection
+     */
     public Connection(Socket socket, Server server) {
         type = Type.SERVER;
+
+        if(!socket.isConnected()){
+            System.out.println("ERROR: Constructor requires connected socket");
+            System.exit(0);
+        }
 
         try{
             this.socket = socket;
@@ -75,6 +89,11 @@ public class Connection {
         new Thread(new Thread(listener)).start();
     }
 
+    /**
+     * Sends message over the connected socket
+     * @param input Message to be sent
+     * @return true if send succeeds, false if send fails
+     */
     public boolean send(String input){
         if(!isConnected()){
             return false;
@@ -89,6 +108,10 @@ public class Connection {
         return true;
     }
 
+    /**
+     * Reads from socket, times out after 1 second
+     * @return Returns message if read successfully, or null if failed/timed out
+     */
     public String read() {
         if(!isConnected()){
             return null;
@@ -102,12 +125,15 @@ public class Connection {
             //Standard read time out. Not bad at all.
         } catch (IOException e) {
             logger.error(e.toString());
-            return null;
         }
 
         return message;
     }
 
+    /**
+     * Flushes and closes all connections and stops the listening thread
+     * @throws IOException
+     */
     public void close() throws IOException{
         input.close();
         output.flush();
@@ -142,6 +168,9 @@ public class Connection {
         return this;
     }
 
+    /**
+     * Separate thread for listening to incoming messages over the connection.
+     */
     class InputListener implements Runnable {
         private boolean running;
 
@@ -159,7 +188,7 @@ public class Connection {
                     String message = read();
                     if(message!=null){
                         getServer().broadcast(message, getRef());
-                        System.out.println("RECEIVED: " + message);
+                        System.out.println("Received: " + message);
                     }
                 }
             } else if (getType() == Type.CLIENT) {
