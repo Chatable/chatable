@@ -15,7 +15,7 @@ run apt-get install -y oracle-java8-installer
 run apt-get install -y git maven
 
 # Clone project
-run git clone https://github.com/HenryStevens/chatable.git
+run git clone https://github.com/Chatable/chatable.git
 
 # Expose the http port
 expose 12345
