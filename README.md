@@ -1,7 +1,7 @@
 ![][logo]
 [logo]: https://avatars0.githubusercontent.com/u/10842034?v=3&s=200 "Chatable"
 
-[![Build Status](https://travis-ci.org/HenryStevens/chatable.svg?branch=master)](https://travis-ci.org/HenryStevens/chatable)
+[![Build Status](https://travis-ci.org/HenryStevens/chatable.svg?branch=master)](https://travis-ci.org/HenryStevens/chatable) [![Code Climate](https://codeclimate.com/github/Chatable/chatable/badges/gpa.svg)](https://codeclimate.com/github/Chatable/chatable)
 
 By Henry Stevens & Jack Gerrits
 
