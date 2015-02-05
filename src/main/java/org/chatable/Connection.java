@@ -17,11 +17,6 @@ import java.net.UnknownHostException;
  */
 public class Connection {
 
-    public enum Type {
-        SERVER, CLIENT
-    }
-
-    private Type type;
     private String ip;
     private int port;
     private Socket socket;
@@ -30,31 +25,7 @@ public class Connection {
     private PrintWriter output;
     private BufferedReader input;
     private static final Logger logger = LogManager.getLogger(Connection.class);
-
-    /**
-     * Constructor for connections from client to server.
-     * @param ip ip to connect to, can also be a domain name
-     * @param port port to connect to
-     */
-    public Connection(String ip, int port) {
-        type = Type.CLIENT;
-        this.ip = ip;
-        this.port = port;
-
-        try{
-            socket = new Socket();
-            socket.connect(new InetSocketAddress(ip,port),4000);
-        } catch (UnknownHostException e) {
-            logger.error(e.toString());
-        } catch (IOException e) {
-            logger.error(e.toString());
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
-
-        listener = new InputListener();
-        new Thread(new Thread(listener)).start();
-    }
+    //private String name;
 
     /**
      * Constructor for connections from server to client
@@ -62,7 +33,6 @@ public class Connection {
      * @param server Reference to server object that is managing the connection
      */
     public Connection(Socket socket, Server server) {
-        type = Type.SERVER;
 
         if(!socket.isConnected()){
             System.out.println("ERROR: Constructor requires connected socket");
@@ -85,6 +55,14 @@ public class Connection {
             logger.error(e.toString());
         }
 
+//        while(true){
+//            String init = read();
+//            if(init!=null){
+//                name = init.substring(init.indexOf(':'));
+//                break;
+//            }
+//        }
+
         listener = new InputListener();
         new Thread(new Thread(listener)).start();
     }
@@ -100,6 +78,7 @@ public class Connection {
         }
 
         output.println(input);
+        //output.println("name: " + input);
 
         if(output.checkError()){
             output.flush();
@@ -155,10 +134,6 @@ public class Connection {
         return port;
     }
 
-    public Type getType(){
-        return type;
-    }
-
     public Server getServer(){
         return server;
     }
@@ -183,20 +158,12 @@ public class Connection {
         }
 
         public void run() {
-            if(getType() == Type.SERVER){
-                while(running) {
-                    String message = read();
-                    if(message!=null){
-                        getServer().broadcast(message, getRef());
-                        System.out.println("Received: " + message);
-                    }
-                }
-            } else if (getType() == Type.CLIENT) {
-                while(running) {
-                    String message = read();
-                    if (message != null) {
-                        System.out.println("Received: " + message);
-                    }
+            while(running) {
+                String message = read();
+                if (message != null) {
+                    getServer().broadcast(message, getRef());
+                    System.out.println("RECEIVED: " + message);
+                    //System.out.println("RECEIVED - " + name + ": " + message);
                 }
             }
         }

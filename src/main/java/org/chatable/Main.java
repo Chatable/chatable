@@ -14,7 +14,6 @@ public class Main {
         System.out.println("this is a big test");
     }
 
-
     public boolean thisAlwaysReturnsTrue() {
         return true;
     }
