@@ -18,7 +18,10 @@ import java.util.Base64;
  */
 public class Connection {
 
+    public enum SocketType { SOCKET, WEBSOCKET }
+
     private String ip;
+    private SocketType sockType;
     private int port;
     private Socket socket;
     private InputListener listener;
@@ -52,6 +55,8 @@ public class Connection {
             logger.error(e.toString());
         }
 
+        sockType = SocketType.SOCKET;
+
         //Handling websocket connections, currently not fussy. Will accept any websocket connection. Can change later to be stricter.
         String message = read();
         if (message!=null){
@@ -78,6 +83,7 @@ public class Connection {
                         "Connection: Upgrade\r\n" +
                         "Sec-WebSocket-Accept: " + genResKey(key) +
                         "\r\n");
+                sockType = SocketType.WEBSOCKET;
             }
         }
 
@@ -95,7 +101,7 @@ public class Connection {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        //hash the concatentated key and then return as base64 encoded string
+        //hash the concatenated key and then return as base64 encoded string
         return Base64.getEncoder().encodeToString(sha1.digest(concat.getBytes()));
     }
 
