@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * Created by jackgerrits on 2/02/15.
@@ -95,8 +96,7 @@ public class Connection {
             e.printStackTrace();
         }
         //hash the concatentated key and then return as base64 encoded string
-        return Base64.encodeBytes(sha1.digest(concat.getBytes()));
-
+        return Base64.getEncoder().encodeToString(sha1.digest(concat.getBytes()));
     }
 
     /**
