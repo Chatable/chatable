@@ -14,10 +14,10 @@ public class Server {
     private ArrayList<Connection> allConnections;
     private ArrayBlockingQueue<Message> messages;
     private int port;
-    private final int QUEUE_SIZE = 10;
+    private final int QUEUE_SIZE = 50;
 
     public static void main(String args[]){
-        Server server = new Server(12345);
+        Server server = new Server(11101);
         try {
             server.run();
         } catch(Exception e) {

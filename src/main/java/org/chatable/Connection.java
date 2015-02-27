@@ -7,10 +7,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by jackgerrits on 2/02/15.
@@ -47,24 +47,56 @@ public class Connection {
                     socket.getInputStream()));
             ip = socket.getRemoteSocketAddress().toString();
             port = socket.getPort();
-        } catch (UnknownHostException e) {
-            logger.error(e.toString());
-        } catch (IOException e) {
-            logger.error(e.toString());
         } catch (Exception e) {
             logger.error(e.toString());
         }
 
-//        while(true){
-//            String init = read();
-//            if(init!=null){
-//                name = init.substring(init.indexOf(':'));
-//                break;
-//            }
-//        }
+        //Handling websocket connections, currently not fussy. Will accept any websocket connection. Can change later to be stricter.
+        String message = read();
+        if (message!=null){
+            String key = "";
+
+            //Detect http request header
+            if (message.contains("GET / HTTP/1.1")){
+                //Goes through each http field
+                while(!message.isEmpty()) {
+                    if(message.contains(":")) {
+                        //Searches for the key and extracts it. Can be extended to gather other pieces of information from the header.
+                        String field = message.substring(0,message.indexOf(':'));
+                        switch(field){
+                            case "Sec-WebSocket-Key":
+                                key = message.substring(message.indexOf(':')+1).trim();
+                        }
+                    }
+                    message = read();
+                }
+
+                //send handshake response to client, with required accept key
+                send("HTTP/1.1 101 Switching Protocols\r\n" +
+                        "Upgrade: websocket\r\n" +
+                        "Connection: Upgrade\r\n" +
+                        "Sec-WebSocket-Accept: " + genResKey(key) +
+                        "\r\n");
+            }
+        }
+
 
         listener = new InputListener();
         new Thread(new Thread(listener)).start();
+    }
+
+    static String genResKey(String key){
+        //append GUID to given key
+        String concat = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+        MessageDigest sha1 = null;
+        try {
+            sha1 = MessageDigest.getInstance("SHA1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        //hash the concatentated key and then return as base64 encoded string
+        return Base64.encodeBytes(sha1.digest(concat.getBytes()));
+
     }
 
     /**
@@ -169,3 +201,5 @@ public class Connection {
         }
     }
 }
+
+
