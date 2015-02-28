@@ -3,25 +3,28 @@ package org.chatable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * Created by jackgerrits on 2/02/15.
  */
 public class Connection {
 
+    public enum SocketType { SOCKET, WEBSOCKET }
+
     private String ip;
+    private SocketType sockType;
     private int port;
     private Socket socket;
     private InputListener listener;
     private Server server;
+    private OutputStream os;
+    private InputStream is;
     private PrintWriter output;
     private BufferedReader input;
     private static final Logger logger = LogManager.getLogger(Connection.class);
@@ -42,29 +45,64 @@ public class Connection {
         try{
             this.socket = socket;
             this.server = server;
-            output = new PrintWriter(socket.getOutputStream(), true);
-            input = new BufferedReader(new InputStreamReader(
-                    socket.getInputStream()));
+            os = socket.getOutputStream();
+            output = new PrintWriter(os, true);
+            is = socket.getInputStream();
+            input = new BufferedReader(new InputStreamReader(is));
             ip = socket.getRemoteSocketAddress().toString();
             port = socket.getPort();
-        } catch (UnknownHostException e) {
-            logger.error(e.toString());
-        } catch (IOException e) {
-            logger.error(e.toString());
         } catch (Exception e) {
             logger.error(e.toString());
         }
 
-//        while(true){
-//            String init = read();
-//            if(init!=null){
-//                name = init.substring(init.indexOf(':'));
-//                break;
-//            }
-//        }
+        sockType = SocketType.SOCKET;
+
+        //Handling websocket connections, currently not fussy. Will accept any websocket connection. Can change later to be stricter.
+        String message = read();
+        if (message!=null){
+            String key = "";
+
+            //Detect http request header
+            if (message.contains("GET / HTTP/1.1")){
+                //Goes through each http field
+                while(!message.isEmpty()) {
+                    if(message.contains(":")) {
+                        //Searches for the key and extracts it. Can be extended to gather other pieces of information from the header.
+                        String field = message.substring(0,message.indexOf(':'));
+                        switch(field){
+                            case "Sec-WebSocket-Key":
+                                key = message.substring(message.indexOf(':')+1).trim();
+                        }
+                    }
+                    message = read();
+                }
+
+                //send handshake response to client, with required accept key
+                send("HTTP/1.1 101 Switching Protocols\r\n" +
+                        "Upgrade: websocket\r\n" +
+                        "Connection: Upgrade\r\n" +
+                        "Sec-WebSocket-Accept: " + genResKey(key) +
+                        "\r\n");
+                sockType = SocketType.WEBSOCKET;
+            }
+        }
+
 
         listener = new InputListener();
         new Thread(new Thread(listener)).start();
+    }
+
+    static String genResKey(String key){
+        //append GUID to given key
+        String concat = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+        MessageDigest sha1 = null;
+        try {
+            sha1 = MessageDigest.getInstance("SHA1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        //hash the concatenated key and then return as base64 encoded string
+        return Base64.getEncoder().encodeToString(sha1.digest(concat.getBytes()));
     }
 
     /**
@@ -77,14 +115,68 @@ public class Connection {
             return false;
         }
 
-        output.println(input);
-        //output.println("name: " + input);
+        if(sockType == SocketType.SOCKET){
+            output.println(input);
 
-        if(output.checkError()){
-            output.flush();
+            if(output.checkError()){
+                output.flush();
+                return false;
+            }
+            return true;
+        } else if (sockType == SocketType.WEBSOCKET) {
+            byte[] rawData = input.getBytes();
+            int frameCount = 0;
+            byte[] frame = new byte[10];
+            frame[0] = (byte) 129;
+
+            if (rawData.length <= 125) {
+                frame[1] = (byte) rawData.length;
+                frameCount = 2;
+            } else if (rawData.length >= 126 && rawData.length <= 65535) {
+                frame[1] = (byte) 126;
+                int len = rawData.length;
+                frame[2] = (byte) ((len >> 8));
+                frame[3] = (byte) (len);
+                frameCount = 4;
+            } else {
+                frame[1] = (byte) 127;
+                int len = rawData.length;
+                frame[2] = (byte) ((len >> 24));
+                frame[3] = (byte) ((len >> 16));
+                frame[4] = (byte) ((len >> 8));
+                frame[5] = (byte) ((len));
+                frame[6] = (byte) ((len >> 24));
+                frame[7] = (byte) ((len >> 16));
+                frame[8] = (byte) ((len >> 8));
+                frame[9] = (byte) (len);
+                frameCount = 10;
+            }
+
+            int bLength = frameCount + rawData.length;
+
+            byte[] reply = new byte[bLength];
+
+            int bLim = 0;
+            for (int i = 0; i < frameCount; i++) {
+                reply[bLim] = frame[i];
+                bLim++;
+            }
+            for (byte aRawData : rawData) {
+                reply[bLim] = aRawData;
+                bLim++;
+            }
+
+            try {
+                os.write(reply);
+                os.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        } else {
             return false;
         }
-        return true;
     }
 
     /**
@@ -96,17 +188,66 @@ public class Connection {
             return null;
         }
 
-        String message = null;
-        try {
-            socket.setSoTimeout(1000);
-            message = input.readLine();
-        } catch (SocketTimeoutException e) {
-            //Standard read time out. Not bad at all.
-        } catch (IOException e) {
-            logger.error(e.toString());
-        }
+        if(sockType == SocketType.SOCKET){
+            String message = null;
+            try {
+                socket.setSoTimeout(5000);
+                message = input.readLine();
+            } catch (SocketTimeoutException e) {
+                //Standard read time out. Not bad at all.
+            } catch (IOException e) {
+                logger.error(e.toString());
+            }
 
-        return message;
+            return message;
+
+        } else if (sockType == SocketType.WEBSOCKET){
+            int len = 0;
+            int buffLength = 256;
+            byte[] b = new byte[buffLength];
+
+            try {
+                len = is.read(b);
+            } catch (SocketTimeoutException e) {
+               return null;
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
+            if(len!=-1){
+                byte rLength = 0;
+                int rMaskIndex = 2;
+                int rDataStart = 0;
+                //always text being transferred. no need to check b[0]
+                byte data = b[1];
+                byte op = (byte) 127;
+                rLength = (byte)(data & op);
+
+                if(rLength==(byte)126) rMaskIndex=4;
+                if(rLength==(byte)127) rMaskIndex=10;
+
+                byte[] masks = new byte[4];
+
+                int j=0;
+                int i=0;
+                for(i=rMaskIndex;i<(rMaskIndex+4);i++){
+                    masks[j] = b[i];
+                    j++;
+                }
+                rDataStart = rMaskIndex + 4;
+
+                int messLen = len - rDataStart;
+
+                byte[] message = new byte[messLen];
+
+                for(i=rDataStart, j=0; i<len; i++, j++){
+                    message[j] = (byte) (b[i] ^ masks[j % 4]);
+                }
+
+                return new String(message);
+            }
+        }
+        return null;
     }
 
     /**
@@ -117,6 +258,8 @@ public class Connection {
         input.close();
         output.flush();
         output.close();
+        os.flush();
+        os.close();
         socket.close();
         listener.stop();
         System.out.println("Connection closed.");
@@ -169,3 +312,5 @@ public class Connection {
         }
     }
 }
+
+
