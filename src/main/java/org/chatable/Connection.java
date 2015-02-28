@@ -191,7 +191,7 @@ public class Connection {
         if(sockType == SocketType.SOCKET){
             String message = null;
             try {
-                socket.setSoTimeout(1000);
+                socket.setSoTimeout(5000);
                 message = input.readLine();
             } catch (SocketTimeoutException e) {
                 //Standard read time out. Not bad at all.
@@ -200,10 +200,53 @@ public class Connection {
             }
 
             return message;
+
         } else if (sockType == SocketType.WEBSOCKET){
+            int len = 0;
+            int buffLength = 256;
+            byte[] b = new byte[buffLength];
 
+            try {
+                len = is.read(b);
+            } catch (SocketTimeoutException e) {
+               return null;
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
+            if(len!=-1){
+                byte rLength = 0;
+                int rMaskIndex = 2;
+                int rDataStart = 0;
+                //always text being transferred. no need to check b[0]
+                byte data = b[1];
+                byte op = (byte) 127;
+                rLength = (byte)(data & op);
+
+                if(rLength==(byte)126) rMaskIndex=4;
+                if(rLength==(byte)127) rMaskIndex=10;
+
+                byte[] masks = new byte[4];
+
+                int j=0;
+                int i=0;
+                for(i=rMaskIndex;i<(rMaskIndex+4);i++){
+                    masks[j] = b[i];
+                    j++;
+                }
+                rDataStart = rMaskIndex + 4;
+
+                int messLen = len - rDataStart;
+
+                byte[] message = new byte[messLen];
+
+                for(i=rDataStart, j=0; i<len; i++, j++){
+                    message[j] = (byte) (b[i] ^ masks[j % 4]);
+                }
+
+                return new String(message);
+            }
         }
-
         return null;
     }
 

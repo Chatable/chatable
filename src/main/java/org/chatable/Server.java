@@ -56,6 +56,7 @@ public class Server {
     public void run() throws Exception {
         ServerSocket ss = new ServerSocket(port);
 
+        //TODO handle ping/pong
         while(true){
             ss.setSoTimeout(500);
             try{
