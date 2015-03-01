@@ -18,7 +18,7 @@ run apt-get install -y git maven
 run git clone https://github.com/Chatable/chatable.git
 
 # Expose the http port
-expose 12345
+expose 11101
 
 workdir chatable
 
