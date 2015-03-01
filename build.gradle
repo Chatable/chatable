@@ -1,13 +1,22 @@
 apply plugin: 'java'
-apply plugin: 'application'
+apply plugin: 'com.bmuschko.docker-remote-api'
 
-mainClassName = "org.chatable.Server"
 
 version = '1.0'
 
 repositories {
     mavenCentral()
     mavenLocal()
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:2.0.2'
+    }
 }
 
 dependencies {
@@ -18,4 +27,24 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.2.1'
+}
+
+task run << {
+    println 'Default Running!'
+}
+
+
+
+
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+task createDockerfile(type: Dockerfile) {
+    destFile = project.file('build/mydockerfile/Dockerfile')
+    from 'from dockerfile/java:oracle-java8'
+    maintainer 'Henry and Jack "support@chatable.io"'
+}
+task buildImage(type: DockerBuildImage) {
+    dependsOn createDockerfile
+    inputDir = createDockerfile.destFile.parentFile
 }
