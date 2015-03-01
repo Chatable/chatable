@@ -29,10 +29,12 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.2.1'
 }
 
-task run << {
-    println 'Default Running!'
+task(run, dependsOn: 'classes', type: JavaExec) {
+            main = 'org.chatable.Server'
+            classpath = sourceSets.main.runtimeClasspath
 }
 
+defaultTasks 'run'
 
 
 

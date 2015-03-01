@@ -10,8 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by jackgerrits on 2/02/15.
  */
 public class Server {
-    
-    //THIS IS A MINOR CHANGE TO TEST continuous deployment
 
     private ArrayList<Connection> allConnections;
     private ArrayBlockingQueue<Message> messages;
@@ -66,7 +64,7 @@ public class Server {
                 Connection current = new Connection(socket, this);
                 allConnections.add(current);
             } catch (SocketTimeoutException e){
-                System.out.println("Timeout - checking broadcasts");
+                System.out.println("Timeout - checking broadcasts new version");
                 processBroadcasts();
             }
         }
