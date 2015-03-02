@@ -22,6 +22,6 @@ expose 11101
 
 workdir chatable
 
-cmd ["pwd"]
-cmd ["ls"]
-cmd ["./gradlew", "run"]
+run ./gradlew run
+
+#cmd ["./gradlew", "run"]
